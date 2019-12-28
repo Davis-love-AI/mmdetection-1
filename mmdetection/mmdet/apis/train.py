@@ -238,7 +238,7 @@ def _non_dist_train(model, dataset, cfg, validate=False):
                     CocoDistEvalmAPHook(val_dataset_cfg, **eval_cfg))
             else:
                 runner.register_hook(
-                    DistEvalmAPHook(val_dataset_cfg, **eval_cfg))                               
+                    DistEvalmAPHook(val_dataset_cfg, **eval_cfg))
     if cfg.resume_from:
         runner.resume(cfg.resume_from)
     elif cfg.load_from:

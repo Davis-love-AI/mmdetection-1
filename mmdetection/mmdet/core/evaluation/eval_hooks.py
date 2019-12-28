@@ -66,8 +66,8 @@ class DistEvalHook(Hook):
             tmp_file = osp.join(runner.work_dir,
                                 'temp_{}.pkl'.format(runner.rank))
             mmcv.dump(results, tmp_file)
-            dist.barrier()
-        dist.barrier()
+        #     dist.barrier()
+        # dist.barrier()
 
     def evaluate(self):
         raise NotImplementedError
