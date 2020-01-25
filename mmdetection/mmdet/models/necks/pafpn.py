@@ -6,7 +6,7 @@ from mmdet.core import auto_fp16
 from ..registry import NECKS
 from ..utils import ConvModule
 
-@NECKS.register
+@NECKS.register_module
 class PAFPN(nn.Module):
     def __init__(self,
                  in_channels,
