@@ -8,7 +8,6 @@ from ..utils import ConvModule
 
 @NECKS.register
 class PAFPN(nn.Module):
-
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -51,7 +50,7 @@ class PAFPN(nn.Module):
         self.downup_sampling=nn.ModuleList()
         self.res_convs=nn.ModuleList()
 
-         for i in range(self.start_level, self.backbone_end_level):
+        for i in range(self.start_level, self.backbone_end_level):
             l_conv = ConvModule(
                 in_channels[i],
                 out_channels,
