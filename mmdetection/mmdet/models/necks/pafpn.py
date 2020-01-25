@@ -10,13 +10,6 @@ from ..utils import ConvModule
 class PAFPN(nn.Module):
 
     def __init__(self,
-                in_channels,
-                out_channels,
-                num_outs,
-                start_level=0,
-                end_level=-1,
-                add_extra_convs=False):
-        def __init__(self,
                  in_channels,
                  out_channels,
                  num_outs,
