@@ -1,4 +1,10 @@
+import torch.nn as nn
+import torch.nn.functional as F
+from mmcv.cnn import xavier_init
+
+from mmdet.core import auto_fp16
 from ..registry import NECKS
+from ..utils import ConvModule
 
 @NECKS.register
 class PAFPN(nn.Module):
@@ -23,7 +29,7 @@ class PAFPN(nn.Module):
                  conv_cfg=None,
                  norm_cfg=None,
                  activation=None):
-        super(RESFPN, self).__init__()
+        super(PAFPN, self).__init__()
         assert isinstance(in_channels, list)
         self.in_channels = in_channels
         self.out_channels = out_channels
