@@ -116,8 +116,8 @@ class PAFPN(nn.Module):
 
         # build top-down path
         used_backbone_levels = len(laterals)
-        laterals[used_backbone_levels-1]+=p6_down
-
+        laterals[used_backbone_levels]+=p6_down
+        #laterals[used_backbone_levels-1]+=p6_down
         for i in range(used_backbone_levels - 1, 0, -1):
 
             laterals[i - 1] += F.interpolate(
