@@ -26,7 +26,7 @@ class SingleRoIExtractor(nn.Module):
                  roi_layer,
                  out_channels,
                  featmap_strides,
-                 add_context=False, #add_context = True when use PANet
+                 add_context=True, #add_context = True when use PANet
                  finest_scale=56):
         super(SingleRoIExtractor, self).__init__()
         self.roi_layers = self.build_roi_layers(roi_layer, featmap_strides)
