@@ -82,12 +82,13 @@ class FPN(nn.Module):
             self.fpn_convs.append(fpn_conv)
             self.downup_sampling.append(down_sampling)
             self.res_convs.append(res_conv)
-        # self.conv_p6=ConvModule(in_channels[-1],out_channels,3,stride=2,padding=1,
-        #                         conv_cfg=conv_cfg,
-        #                         norm_cfg=norm_cfg if not self.no_norm_on_lateral else None,
-        #                         activation=self.activation,
-        #                         inplace=False
-        #                         )
+            
+        self.conv_p6=ConvModule(in_channels[-1],out_channels,3,stride=2,padding=1,
+                                conv_cfg=conv_cfg,
+                                norm_cfg=norm_cfg if not self.no_norm_on_lateral else None,
+                                activation=self.activation,
+                                inplace=False)
+
         # add extra conv layers (e.g., RetinaNet)
         extra_levels = num_outs - self.backbone_end_level + self.start_level
         if add_extra_convs and extra_levels >= 1:
@@ -122,9 +123,7 @@ class FPN(nn.Module):
 
         # build laterals
         laterals = [
-            lateral_conv(inputs[i + self.start_level])
-            for i, lateral_conv in enumerate(self.lateral_convs)
-        ]
+            lateral_conv(inputs[i + self.start_level]) for i, lateral_conv in enumerate(self.lateral_convs)]
         #self.lateral_conv Four 1 * 1 convolutions unify the number of channels of four different input features [256, 512, 1024, 2048] to 256
         p6=self.conv_p6(inputs[-1])
         p6_down=F.interpolate(p6,scale_factor=2,mode='nearest')
