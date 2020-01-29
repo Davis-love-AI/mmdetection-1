@@ -8,7 +8,7 @@ from ..utils import ConvModule
 
 
 @NECKS.register_module
-class FPN(nn.Module):
+class PAFPN(nn.Module):
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -22,7 +22,7 @@ class FPN(nn.Module):
                  conv_cfg=None,
                  norm_cfg=None,
                  activation=None):
-        super(FPN, self).__init__()
+        super(PAFPN, self).__init__()
         assert isinstance(in_channels, list)
         self.in_channels = in_channels
         self.out_channels = out_channels
@@ -60,6 +60,8 @@ class FPN(nn.Module):
                 norm_cfg=norm_cfg if not self.no_norm_on_lateral else None,
                 activation=self.activation,
                 inplace=False)
+            self.lateral_convs.append(l_conv)
+        for i in range(self.start_level, self.backbone_end_level+1):
             fpn_conv = ConvModule(
                 out_channels,
                 out_channels,
@@ -69,7 +71,11 @@ class FPN(nn.Module):
                 norm_cfg=norm_cfg,
                 activation=self.activation,
                 inplace=False)
+            self.fpn_convs.append(fpn_conv)
+        for i in range(self.start_level, self.backbone_end_level):
             down_sampling=nn.MaxPool2d(2,stride=2)
+            self.downup_sampling.append(down_sampling)
+        for i in range(self.start_level, self.backbone_end_level):
             res_conv = ConvModule(
                 in_channels[i],
                 out_channels,
@@ -78,11 +84,7 @@ class FPN(nn.Module):
                 norm_cfg=norm_cfg if not self.no_norm_on_lateral else None,
                 activation=self.activation,
                 inplace=False)
-            self.lateral_convs.append(l_conv)
-            self.fpn_convs.append(fpn_conv)
-            self.downup_sampling.append(down_sampling)
             self.res_convs.append(res_conv)
-            
         self.conv_p6=ConvModule(in_channels[-1],out_channels,3,stride=2,padding=1,
                                 conv_cfg=conv_cfg,
                                 norm_cfg=norm_cfg if not self.no_norm_on_lateral else None,
@@ -118,19 +120,25 @@ class FPN(nn.Module):
     @auto_fp16()
     def forward(self, inputs):
         assert len(inputs) == len(self.in_channels)
-        #The inputs are four ndarrays. The first is (4,256,104,336).
+        # The inputs are four ndarrays. The first is (4,256,104,336).
         # The known inputs are 800 and 1333 in size. Here is the resnet output corresponding to a layer P3-P6 of stride 8.
 
         # build laterals
-        laterals = [
-            lateral_conv(inputs[i + self.start_level]) for i, lateral_conv in enumerate(self.lateral_convs)]
+        laterals = [lateral_conv(inputs[i + self.start_level]) for i, lateral_conv in enumerate(self.lateral_convs)]
         #self.lateral_conv Four 1 * 1 convolutions unify the number of channels of four different input features [256, 512, 1024, 2048] to 256
         p6=self.conv_p6(inputs[-1])
         p6_down=F.interpolate(p6,scale_factor=2,mode='nearest')
 
         # build top-down path
         used_backbone_levels = len(laterals)
-        laterals[used_backbone_levels-1]+=p6_down
+        #laterals interpolate
+        new = F.interpolate(laterals[used_backbone_levels-1],[26,34],mode='bilinear',align_corners=False)
+        print(new.size())
+        print(p6_down.size())
+        new+=p6_down
+        #laterals[used_backbone_levels-1]+=p6_down
+        #laterals[used_backbone_levels-1] = laterals[used_backbone_levels-1] + p6_down
+
         # for i in range(used_backbone_levels - 1, 0, -1):
         #     laterals[i - 1] += F.interpolate(
         #         laterals[i], scale_factor=2, mode='nearest')
@@ -147,14 +155,32 @@ class FPN(nn.Module):
         #Is a set of 3 * 3 convolutions to eliminate the soul stack effect of the fused P3-P6 features
         outs.append(p6)
         #out0 is P3 maximum resolution
-
+        #print(len(self.downup_sampling)) #4
+        #print(used_backbone_levels) #4
         N=[]
         for i in range(used_backbone_levels+1):
             if i==0:
                 N.append(outs[i])
-            else:
+            if i < 5:
+                print(self.downup_sampling[i-1](N[i-1]).size())
+                print(outs[i].size())
+                print(i)
                 N.append(self.downup_sampling[i-1](N[i-1])+outs[i])
-                # N.append(F.interpolate(N[i-1],scale_factor=0.5,mode='nearest')+outs[i])
+            # if i==5:
+            #     test4 = F.interpolate(self.downup_sampling[4](N[4]),[13,17],mode='bilinear',align_corners=False)
+            #     N.append(test4+outs[i])
+            # if i < 5:
+            #     print(self.downup_sampling[i-1](N[i-1]).size())
+            #     print(outs[i].size())
+            #     N.append(self.downup_sampling[i-1](N[i-1])+outs[i])
+            #     #N.append(F.interpolate(N[i-1],scale_factor=0.5,mode='nearest')+outs[i])
+        print(len(N))
+        exit()
+            # else:
+            #     print(self.downup_sampling[i-1](N[i-1]).size())
+            #     print(outs[i].size())
+            #     N.append(self.downup_sampling[i-1](N[i-1])+outs[i])
+            #     #N.append(F.interpolate(N[i-1],scale_factor=0.5,mode='nearest')+outs[i])
 
         #Residual block
         res_out=[]

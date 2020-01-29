@@ -15,6 +15,7 @@ from mmdet.core import (CocoDistEvalmAPHook, CocoDistEvalRecallHook,
                         DistEvalmAPHook, DistOptimizerHook, Fp16OptimizerHook)
 from mmdet.datasets import DATASETS, build_dataloader
 from mmdet.models import RPN
+from modelsummary import summary
 
 
 def get_root_logger(log_file=None, log_level=logging.INFO):
