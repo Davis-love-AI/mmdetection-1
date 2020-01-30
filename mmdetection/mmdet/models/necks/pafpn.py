@@ -134,7 +134,7 @@ class PAFPN(nn.Module):
         #laterals interpolate
         #new = F.interpolate(laterals[used_backbone_levels-1],[26,34],mode='bilinear',align_corners=False)
         laterals[used_backbone_levels-1]+=p6_down
-        new+=p6_down
+        # new+=p6_down
         #laterals[used_backbone_levels-1]+=p6_down
         #laterals[used_backbone_levels-1] = laterals[used_backbone_levels-1] + p6_down
 
