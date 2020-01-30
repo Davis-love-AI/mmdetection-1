@@ -132,9 +132,8 @@ class PAFPN(nn.Module):
         # build top-down path
         used_backbone_levels = len(laterals)
         #laterals interpolate
-        new = F.interpolate(laterals[used_backbone_levels-1],[26,34],mode='bilinear',align_corners=False)
-        print(new.size())
-        print(p6_down.size())
+        #new = F.interpolate(laterals[used_backbone_levels-1],[26,34],mode='bilinear',align_corners=False)
+        laterals[used_backbone_levels-1]+=p6_down
         new+=p6_down
         #laterals[used_backbone_levels-1]+=p6_down
         #laterals[used_backbone_levels-1] = laterals[used_backbone_levels-1] + p6_down
@@ -161,10 +160,7 @@ class PAFPN(nn.Module):
         for i in range(used_backbone_levels+1):
             if i==0:
                 N.append(outs[i])
-            if i < 5:
-                print(self.downup_sampling[i-1](N[i-1]).size())
-                print(outs[i].size())
-                print(i)
+            else:
                 N.append(self.downup_sampling[i-1](N[i-1])+outs[i])
             # if i==5:
             #     test4 = F.interpolate(self.downup_sampling[4](N[4]),[13,17],mode='bilinear',align_corners=False)
@@ -175,7 +171,6 @@ class PAFPN(nn.Module):
             #     N.append(self.downup_sampling[i-1](N[i-1])+outs[i])
             #     #N.append(F.interpolate(N[i-1],scale_factor=0.5,mode='nearest')+outs[i])
         print(len(N))
-        exit()
             # else:
             #     print(self.downup_sampling[i-1](N[i-1]).size())
             #     print(outs[i].size())
