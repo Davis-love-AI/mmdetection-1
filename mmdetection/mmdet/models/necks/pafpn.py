@@ -170,7 +170,6 @@ class PAFPN(nn.Module):
             #     print(outs[i].size())
             #     N.append(self.downup_sampling[i-1](N[i-1])+outs[i])
             #     #N.append(F.interpolate(N[i-1],scale_factor=0.5,mode='nearest')+outs[i])
-        print(len(N))
             # else:
             #     print(self.downup_sampling[i-1](N[i-1]).size())
             #     print(outs[i].size())
