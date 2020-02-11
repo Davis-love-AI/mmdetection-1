@@ -250,5 +250,5 @@ dist_params = dict(backend='nccl')
 log_level = 'INFO'
 work_dir = '/home/napasinh/Desktop/Sun/mmdetection/split1/htc_mrcnn50/fold3'
 load_from = None
-resume_from = None
+resume_from = '/home/napasinh/Desktop/Sun/mmdetection/split1/htc_mrcnn50/fold3/epoch_6.pth'
 workflow = [('train', 1)]
