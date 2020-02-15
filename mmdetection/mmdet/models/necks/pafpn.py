@@ -127,8 +127,8 @@ class PAFPN(nn.Module):
         laterals = [lateral_conv(inputs[i + self.start_level]) for i, lateral_conv in enumerate(self.lateral_convs)]
         #self.lateral_conv Four 1 * 1 convolutions unify the number of channels of four different input features [256, 512, 1024, 2048] to 256
         p6=self.conv_p6(inputs[-1])
-        #p6_down=F.interpolate(p6,scale_factor=2,mode='nearest')
-        p6_down=p6.upsample(scale_factor=2,mode='nearest')
+        p6_down=F.interpolate(p6,scale_factor=2,mode='nearest')
+        #p6_down=p6.upsample(scale_factor=2,mode='nearest')
         # build top-down path
         used_backbone_levels = len(laterals)
         #laterals interpolate
